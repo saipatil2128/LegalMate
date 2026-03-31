@@ -1,0 +1,32 @@
+
+---
+
+## 🚫 .gitignore
+```gitignore
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Database
+*.sql
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
