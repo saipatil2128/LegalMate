@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Filing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="root" class="container mx-auto py-8 px-4"></div>
+    
+    <script>
+        // Global state
+        const state = {
+            currentStep: 1,
+            selectedCaseType: '',
+            selectedJurisdiction: '',
+            showSuccess: false,
+            userInputs: {
+                clientName: '',
+                contactInfo: '',
+                incidentDate: '',
+                caseDescription: '',
+            }
+        };
+
+        // Case types data
+        const caseTypes = [
+            { value: 'civil', label: 'Civil Case', icon: '⚖', description: 'Disputes between individuals or organizations regarding rights and duties' },
+            { value: 'criminal', label: 'Criminal Case', icon: '🔒', description: 'Cases involving violation of criminal laws' },
+            { value: 'family', label: 'Family Matter', icon: '👪', description: 'Divorce, custody, maintenance, and other domestic relations' },
+            { value: 'consumer', label: 'Consumer Dispute', icon: '🛒', description: 'Complaints against products, services, or unfair trade practices' },
+            { value: 'property', label: 'Property Dispute', icon: '🏠', description: 'Real estate, land ownership, and boundary issues' },
+            { value: 'employment', label: 'Employment/Labor Dispute', icon: '💼', description: 'Workplace disputes, unfair dismissal, wages, etc.' }
+        ];
+
+        // Jurisdictions data
+        const jurisdictions = [
+            'Delhi',
+            'Mumbai',
+            'Kolkata',
+            'Chennai',
+            'Bangalore',
+            'Hyderabad',
+            'Other'
+        ];
+
+        // Helper functions
+        function getCaseSpecificDeadline() {
+            switch (state.selectedCaseType) {
+                case 'civil':
+                    return '3 years from the date of cause of action (Limitation Act, 1963)';
+                case 'criminal':
+                    return 'No general limitation, but prompt action is advisable';
+                case 'family':
+                    return 'Varies by case type - generally 3 years for most matters';
+                case 'consumer':
+                    return '2 years from the date of cause of action';
+                case 'property':
+                    return '12 years for immovable property disputes';
+                case 'employment':
+                    return '3 months to 3 years depending on the specific claim type';
+                default:
+                    return 'Please select a case type';
+            }
+        }
+
+        function getEstimatedFees() {
+            if (!state.selectedCaseType || !state.selectedJurisdiction) return 'Unknown';
+            
+            // Simplified estimation
+            const baseFees = {
+                'civil': 1500,
+                'criminal': 1000,
+                'family': 2000,
+                'consumer': 500,
+                'property': 3000,
+                'employment': 1200
+            };
+            
+            const jurisdictionMultiplier = {
+                'Delhi': 1.2,
+                'Mumbai': 1.5,
+                'Kolkata': 1.1,
+                'Chennai': 1.2,
+                'Bangalore': 1.3,
+                'Hyderabad': 1.1,
+              
+            };
+            
+            const estimated = Math.round(baseFees[state.selectedCaseType] * jurisdictionMultiplier[state.selectedJurisdiction]);
+            return `₹${estimated} - ₹${estimated + 2000}`;
+        }
+
+        function canMoveForward() {
+            switch (state.currentStep) {
+                case 1:
+                    return state.selectedCaseType !== '';
+                case 2:
+                    return state.selectedJurisdiction !== '';
+                case 3:
+                    return true; // Document checklist doesn't require validation
+                case 4:
+                    return true; // Filing procedure doesn't require validation
+                case 5:
+                    return state.userInputs.clientName !== '' && state.userInputs.contactInfo !== '';
+                default:
+                    return true;
+            }
+        }
+
+        // UI Rendering functions
+        function renderStepIndicator() {
+            const totalSteps = 5;
+            let stepsHtml = '';
+            
+            for (let i = 1; i <= totalSteps; i++) {
+                let stepClass = '';
+                
+                if (i < state.currentStep) {
+                    stepClass = 'bg-green-500 text-white'; // Completed step
+                } else if (i === state.currentStep) {
+                    stepClass = 'bg-blue-500 text-white'; // Current step
+                } else {
+                    stepClass = 'bg-gray-200 text-gray-600'; // Future step
+                }
+                
+                stepsHtml += `
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center ${stepClass}">
+                            ${i}
+                        </div>
+                        <div class="text-xs mt-1">Step ${i}</div>
+                    </div>
+                `;
+                
+                // Add connecting line except after the last step
+                if (i < totalSteps) {
+                    stepsHtml += `
+                        <div class="flex-grow border-t border-gray-300 mx-2"></div>
+                    `;
+                }
+            }
+            
+            return `
+                <div class="flex items-center justify-between mb-8">
+                    ${stepsHtml}
+                </div>
+            `;
+        }
+
+        function renderStep1() {
+            let caseTypesHtml = '';
+            
+            caseTypes.forEach(type => {
+                const isSelected = state.selectedCaseType === type.value;
+                const borderClass = isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50';
+                
+                caseTypesHtml += `
+                    <div
+                        data-case-type="${type.value}"
+                        class="p-4 border rounded-lg cursor-pointer transition-all ${borderClass}"
+                        onclick="selectCaseType('${type.value}')"
+                    >
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">${type.icon}</span>
+                            <div>
+                                <h4 class="font-medium text-gray-800">${type.label}</h4>
+                                <p class="text-sm text-gray-600 mt-1">${type.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            let selectedCaseInfoHtml = '';
+            if (state.selectedCaseType) {
+                const selectedCaseLabel = caseTypes.find(ct => ct.value === state.selectedCaseType).label;
+                
+                let timeline, complexity;
+                switch(state.selectedCaseType) {
+                    case 'civil':
+                        timeline = '1-3 years';
+                        complexity = 'Moderate to High';
+                        break;
+                    case 'criminal':
+                        timeline = '6 months - 2 years';
+                        complexity = 'High';
+                        break;
+                    case 'family':
+                        timeline = '6 months - 1.5 years';
+                        complexity = 'Moderate';
+                        break;
+                    case 'consumer':
+                        timeline = '3-6 months';
+                        complexity = 'Low to Moderate';
+                        break;
+                    case 'property':
+                        timeline = '2-5 years';
+                        complexity = 'High';
+                        break;
+                    case 'employment':
+                        timeline = '6 months - 1 year';
+                        complexity = 'Moderate';
+                        break;
+                }
+                
+                selectedCaseInfoHtml = `
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <h4 class="font-medium text-blue-800">What to expect with ${selectedCaseLabel}:</h4>
+                        <ul class="mt-2 space-y-1 text-blue-700">
+                            <li>• Typical timeline: ${timeline}</li>
+                            <li>• Complexity level: ${complexity}</li>
+                            <li>• Limitation period: ${getCaseSpecificDeadline()}</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Step 1: Select Your Case Type</h3>
+                    <p class="mb-4 text-gray-600">Choose the type of legal matter you need assistance with:</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${caseTypesHtml}
+                    </div>
+                    
+                    ${selectedCaseInfoHtml}
+                </div>
+            `;
+        }
+
+        function renderStep2() {
+            let jurisdictionsHtml = '';
+            
+            jurisdictions.forEach(jurisdiction => {
+                const isSelected = state.selectedJurisdiction === jurisdiction;
+                const borderClass = isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50';
+                
+                jurisdictionsHtml += `
+                    <div
+                        data-jurisdiction="${jurisdiction}"
+                        class="p-3 border rounded-lg cursor-pointer transition-all text-center ${borderClass}"
+                        onclick="selectJurisdiction('${jurisdiction}')"
+                    >
+                        <h4 class="font-medium">${jurisdiction}</h4>
+                    </div>
+                `;
+            });
+            
+            let jurisdictionInfoHtml = '';
+            if (state.selectedJurisdiction) {
+                let courtType = '';
+                switch(state.selectedCaseType) {
+                    case 'civil':
+                        courtType = 'The Civil Court/District Court depending on the valuation';
+                        break;
+                    case 'criminal':
+                        courtType = 'The Criminal Court/Sessions Court depending on offense';
+                        break;
+                    case 'family':
+                        courtType = 'The Family Court';
+                        break;
+                    case 'consumer':
+                        courtType = 'The Consumer Disputes Redressal Forum';
+                        break;
+                    case 'property':
+                        courtType = 'The Civil Court/Revenue Court depending on issue';
+                        break;
+                    case 'employment':
+                        courtType = 'The Labor Court/Industrial Tribunal';
+                        break;
+                }
+                
+                let legalAidInfo = `${state.selectedJurisdiction} has ${state.selectedJurisdiction === 'Delhi' || state.selectedJurisdiction === 'Mumbai' ? 'several' : 'some'} legal aid centers offering free or subsidized legal assistance.
+                            Court-appointed legal services are available for eligible individuals.`;
+                
+                jurisdictionInfoHtml = `
+                    <div class="mt-6 space-y-4">
+                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                            <h4 class="font-medium text-yellow-800">Jurisdiction Information</h4>
+                            <p class="text-sm text-yellow-700 mt-1">
+                                Your case in ${state.selectedJurisdiction} will be handled by:
+                                ${courtType}
+                            </p>
+                        </div>
+                        
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-100">
+                            <h4 class="font-medium text-green-800">Estimated Court/Filing Fees</h4>
+                            <p class="text-sm text-green-700 mt-1">
+                                Based on your case type and jurisdiction, estimated fees: <strong>${getEstimatedFees()}</strong><br/>
+                                <span class="text-xs">(Note: Actual fees may vary based on specific case details)</span>
+                            </p>
+                        </div>
+                        
+                        <div class="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                            <h4 class="font-medium text-purple-800">Local Legal Aid Resources</h4>
+                            <p class="text-sm text-purple-700 mt-1">
+                                ${legalAidInfo}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Step 2: Determine Your Jurisdiction</h3>
+                    <p class="mb-4 text-gray-600">Select the jurisdiction where your case will be filed:</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        ${jurisdictionsHtml}
+                    </div>
+                    
+                    ${jurisdictionInfoHtml}
+                </div>
+            `;
+        }
+
+        function renderStep3() {
+            if (!state.selectedCaseType) {
+                return `
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4">Step 3: Document Checklist</h3>
+                        <p class="text-yellow-600">Please go back and select a case type first.</p>
+                    </div>
+                `;
+            }
+            
+            let caseSpecificDocumentList = '';
+            
+            // Render case-specific document lists
+            switch(state.selectedCaseType) {
+                case 'civil':
+                    caseSpecificDocumentList = `
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Plaint (in prescribed format)</strong>
+                            <p class="text-sm text-gray-600">The main document initiating your civil case that explains your cause of action</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Vakalatnama</strong>
+                            <p class="text-sm text-gray-600">Power of attorney authorizing your lawyer to represent you</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Affidavit in support of the plaint</strong>
+                            <p class="text-sm text-gray-600">Sworn statement confirming the facts stated in the plaint</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Index of documents</strong>
+                            <p class="text-sm text-gray-600">List of all documents being submitted with the case</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Court fee payment proof</strong>
+                            <p class="text-sm text-gray-600">Receipt of court fee payment as per the Court Fees Act</p>
+                          </div>
+                        </li>
+                    `;
+                    break;
+                case 'criminal':
+                    caseSpecificDocumentList = `
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>FIR copy or Written complaint</strong>
+                            <p class="text-sm text-gray-600">First Information Report filed with police or complaint to Magistrate</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Identification proof</strong>
+                            <p class="text-sm text-gray-600">Government-issued ID like Aadhaar, PAN, or Voter ID</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>List of witnesses (if any)</strong>
+                            <p class="text-sm text-gray-600">Names and contact details of witnesses to the incident</p>
+                          </div>
+                        </li>
+                    `;
+                    break;
+                case 'family':
+                    caseSpecificDocumentList = `
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Petition/Application</strong>
+                            <p class="text-sm text-gray-600">Legal document describing your relief sought</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Marriage certificate</strong>
+                            <p class="text-sm text-gray-600">Proof of marriage for divorce/maintenance cases</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Address proof of both parties</strong>
+                            <p class="text-sm text-gray-600">Documents establishing residence</p>
+                          </div>
+                        </li>
+                    `;
+                    break;
+                case 'consumer':
+                    caseSpecificDocumentList = `
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Consumer complaint</strong>
+                            <p class="text-sm text-gray-600">Detailed complaint about the product/service issue</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Purchase proof/bill/invoice</strong>
+                            <p class="text-sm text-gray-600">Evidence of transaction between consumer and service provider</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Correspondence with opposite party</strong>
+                            <p class="text-sm text-gray-600">Letters, emails showing attempts to resolve the issue</p>
+                          </div>
+                        </li>
+                    `;
+                    break;
+                case 'property':
+                    caseSpecificDocumentList = `
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Property documents</strong>
+                            <p class="text-sm text-gray-600">Sale deed, title documents, registry papers</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Property tax receipts</strong>
+                            <p class="text-sm text-gray-600">Proof of tax payments</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Property survey/measurement records</strong>
+                            <p class="text-sm text-gray-600">Official boundary measurements</p>
+                          </div>
+                        </li>
+                    `;
+                    break;
+                case 'employment':
+                    caseSpecificDocumentList = `
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Employment contract</strong>
+                            <p class="text-sm text-gray-600">Agreement between employer and employee</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Salary slips/payment proofs</strong>
+                            <p class="text-sm text-gray-600">Evidence of remuneration</p>
+                          </div>
+                        </li>
+                        <li class="flex items-start">
+                          <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                          <div>
+                            <strong>Termination letter (if applicable)</strong>
+                            <p class="text-sm text-gray-600">Official notice of employment termination</p>
+                          </div>
+                        </li>
+                    `;
+                    break;
+            }
+            
+            return `
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Step 3: Document Checklist</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h4 class="font-medium text-gray-800 flex items-center">
+                                <span class="mr-2">📋</span> Document Organization Tips
+                            </h4>
+                            <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-600">
+                                <li>Keep original documents safe; use certified copies for filing</li>
+                                <li>Organize documents chronologically</li>
+                                <li>Create an index of all submitted documents</li>
+                                <li>Ensure all documents are properly signed and notarized where required</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pl-4 border-l-4 border-green-400">
+                            <h4 class="font-medium flex items-center">
+                                <span class="p-1 bg-green-100 text-green-800 rounded-full text-xs mr-2">REQUIRED</span>
+                                Essential Documents
+                            </h4>
+                            <ul class="mt-2 space-y-3">
+                                ${caseSpecificDocumentList}
+                            </ul>
+                        </div>
+                        
+                        <div class="pl-4 border-l-4 border-yellow-400">
+                            <h4 class="font-medium flex items-center">
+                                <span class="p-1 bg-yellow-100 text-yellow-800 rounded-full text-xs mr-2">SUPPORTING</span>
+                                Supporting Documents (as applicable)
+                            </h4>
+                            <ul class="mt-2 space-y-3">
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Photographic/Video evidence</strong>
+                                        <p class="text-sm text-gray-600">Visual documentation of incidents, damages, etc.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Medical records</strong>
+                                        <p class="text-sm text-gray-600">In cases involving injury or health issues</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Expert reports</strong>
+                                        <p class="text-sm text-gray-600">Technical evaluations relevant to your case</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Correspondence records</strong>
+                                        <p class="text-sm text-gray-600">Letters, emails, messages related to the dispute</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Witness statements</strong>
+                                        <p class="text-sm text-gray-600">Written testimonies from witnesses</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pl-4 border-l-4 border-blue-400">
+                            <h4 class="font-medium flex items-center">
+                                <span class="p-1 bg-blue-100 text-blue-800 rounded-full text-xs mr-2">ADMINISTRATIVE</span>
+                                Administrative Requirements
+                            </h4>
+                            <ul class="mt-2 space-y-3">
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Identity proof (Aadhaar/PAN/Voter ID)</strong>
+                                        <p class="text-sm text-gray-600">Government-issued identification</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Address proof</strong>
+                                        <p class="text-sm text-gray-600">Document confirming your current residence</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="h-5 w-5 rounded border border-gray-300 mr-2 flex-shrink-0 mt-0.5"></div>
+                                    <div>
+                                        <strong>Passport-sized photographs</strong>
+                                        <p class="text-sm text-gray-600">For official records</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStep4() {
+            let expectedProcessingTime = '';
+            switch(state.selectedCaseType) {
+                case 'civil':
+                    expectedProcessingTime = '2-4 weeks for initial processing';
+                    break;
+                case 'criminal':
+                    expectedProcessingTime = '1-3 weeks for summons issuance';
+                    break;
+                case 'family':
+                    expectedProcessingTime = '2-3 weeks for notice issuance';
+                    break;
+                case 'consumer':
+                    expectedProcessingTime = '15-30 days for admission';
+                    break;
+                case 'property':
+                    expectedProcessingTime = '3-6 weeks for initial processing';
+                    break;
+                case 'employment':
+                    expectedProcessingTime = '2-4 weeks for initial notice';
+                    break;
+                default:
+                    expectedProcessingTime = 'Varies by case type';
+            }
+            
+            let eFilingInfo = '';
+            if (state.selectedJurisdiction === 'Delhi' || state.selectedJurisdiction === 'Mumbai' || state.selectedJurisdiction === 'Bangalore') {
+                eFilingInfo = `${state.selectedJurisdiction} courts offer e-filing facilities. You can file your case online through the official e-Courts portal.`;
+            } else {
+               eFilingInfo = 'Limited e-filing facilities available. Physical filing is recommended.';
+            }
+            
+            return `
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Step 4: Filing Procedure</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex justify-between space-x-4">
+                            <div class="flex-1 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                                <h4 class="font-medium text-indigo-800">Expected Processing Time</h4>
+                                <p class="text-sm text-indigo-700 mt-1">${expectedProcessingTime}</p>
+                            </div>
+                            
+                            <div class="flex-1 p-4 bg-teal-50 rounded-lg border border-teal-100">
+                                <h4 class="font-medium text-teal-800">E-Filing Availability</h4>
+                                <p class="text-sm text-teal-700 mt-1">${eFilingInfo}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                <div class="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div class="relative flex justify-center">
+                                <span class="bg-white px-2 text-gray-500 text-sm">Filing Steps</span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">1</div>
+                                </div>
+                                <div class="ml-4">
+                                    <h5 class="text-lg font-medium">Document Preparation</h5>
+                                    <p class="mt-2 text-gray-600">
+                                        Prepare all required documents according to the checklist. Ensure they are properly signed, notarized (if required), and arranged chronologically with an index.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">2</div>
+                                </div>
+                                <div class="ml-4">
+                                    <h5 class="text-lg font-medium">Fee Calculation & Payment</h5>
+                                    <p class="mt-2 text-gray-600">
+                                        Calculate and pay the required court fee. This can typically be paid online through e-courts portal or via court fee stamps available at designated banks or court complexes.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">3</div>
+                                </div>
+                                <div class="ml-4">
+                                    <h5 class="text-lg font-medium">Filing Submission</h5>
+                                    <p class="mt-2 text-gray-600">
+                                        Submit your complete filing package to the appropriate court registry or upload through the e-filing system if available. Ensure you receive an acknowledgment receipt with a filing/diary number.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">4</div>
+                                </div>
+                                <div class="ml-4">
+                                    <h5 class="text-lg font-medium">Initial Scrutiny</h5>
+                                    <p class="mt-2 text-gray-600">
+                                        The court registry will conduct an initial review of your filing for completeness and compliance with formal requirements. Any deficiencies will need to be rectified within the time specified by the registry.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">5</div>
+                                </div>
+                                <div class="ml-4">
+                                    <h5 class="text-lg font-medium">Case Number Assignment</h5>
+                                    <p class="mt-2 text-gray-600">
+                                        Once your filing is accepted, a case number will be assigned and your case will be listed before the appropriate judge/bench according to the court's roster.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white">6</div>
+                                </div>
+                                <div class="ml-4">
+                                    <h5 class="text-lg font-medium">Notice/Summons Issuance</h5>
+                                    <p class="mt-2 text-gray-600">
+                                        The court will issue notices or summons to the opposite party, which may need to be served through court process or privately, depending on the rules of the specific court.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <h4 class="font-medium text-yellow-800 flex items-center">
+                                <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                                Important Reminders
+                            </h4>
+                            <ul class="list-disc pl-5 mt-2 space-y-1 text-yellow-700">
+                                <li>Track your case status regularly through the e-courts website or mobile app</li>
+                                <li>Note all hearing dates in your calendar</li>
+                                <li>Prepare for each hearing by reviewing relevant documents</li>
+                                <li>Keep copies of all filed documents for your reference</li>
+                                <li>Notify the court promptly of any change in your contact information</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStep5() {
+            return `
+                <div class="p-6 bg-white rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Step 5: Submit Your Information</h3>
+                    <p class="mb-4 text-gray-600">Please provide your details so we can assist you further:</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="clientName" class="block text-sm font-medium text-gray-700">Your Full Name *</label>
+                            <input 
+                                type="text" 
+                                id="clientName" 
+                                value="${state.userInputs.clientName}" 
+                                onchange="updateUserInput('clientName', this.value)" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="contactInfo" class="block text-sm font-medium text-gray-700">Contact Information (Email/Phone) *</label>
+                            <input 
+                                type="text" 
+                                id="contactInfo" 
+                                value="${state.userInputs.contactInfo}" 
+                                onchange="updateUserInput('contactInfo', this.value)" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="incidentDate" class="block text-sm font-medium text-gray-700">Date of Incident/Issue</label>
+                            <input 
+                                type="date" 
+                                id="incidentDate" 
+                                value="${state.userInputs.incidentDate}" 
+                                onchange="updateUserInput('incidentDate', this.value)" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="caseDescription" class="block text-sm font-medium text-gray-700">Brief Description of Your Case</label>
+                            <textarea 
+                                id="caseDescription" 
+                                rows="4" 
+                                onchange="updateUserInput('caseDescription', this.value)" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >${state.userInputs.caseDescription}</textarea>
+                        </div>
+                        
+                        <div class="pt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Case Summary:</label>
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex justify-between mb-2">
+                                    <div class="font-medium text-gray-700">Case Type:</div>
+                                    <div class="text-gray-800">${state.selectedCaseType ? caseTypes.find(ct => ct.value === state.selectedCaseType).label : 'Not selected'}</div>
+                                </div>
+                                <div class="flex justify-between mb-2">
+                                    <div class="font-medium text-gray-700">Jurisdiction:</div>
+                                    <div class="text-gray-800">${state.selectedJurisdiction || 'Not selected'}</div>
+                                </div>
+                                <div class="flex justify-between mb-2">
+                                    <div class="font-medium text-gray-700">Estimated Fees:</div>
+                                    <div class="text-gray-800">${getEstimatedFees()}</div>
+                                </div>
+                                <div class="flex justify-between">
+                                    <div class="font-medium text-gray-700">Limitation Period:</div>
+                                    <div class="text-gray-800">${getCaseSpecificDeadline()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="consent" type="checkbox" onchange="updateConsentStatus()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="consent" class="font-medium text-gray-700">I consent to share my information</label>
+                                <p class="text-gray-500">By checking this box, you agree to our privacy policy and terms of service.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSuccessMessage() {
+            return `
+                <div class="p-8 bg-white rounded-lg shadow-md text-center">
+                    <div class="w-24 h-24 bg-green-100 rounded-full mx-auto flex items-center justify-center">
+                        <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-gray-800 mt-6">Information Submitted Successfully!</h3>
+                    <p class="text-gray-600 mt-2">Thank you for providing your details. Our legal team will review your case and get back to you within 24-48 hours.</p>
+                    
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg text-left">
+                        <h4 class="font-medium text-gray-800">Next Steps:</h4>
+                        <ol class="list-decimal pl-5 mt-2 space-y-1 text-gray-600">
+                            <li>You will receive a confirmation email shortly.</li>
+                            <li>Our legal team will review your case details.</li>
+                            <li>A legal assistant will contact you to discuss your case further.</li>
+                            <li>We will guide you through the subsequent legal process.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-center">
+                        <button 
+                            onclick="resetForm()" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Start a New Case
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNavigationButtons() {
+            if (state.showSuccess) return '';
+            
+            const isPreviousDisabled = state.currentStep === 1;
+            const isNextDisabled = !canMoveForward();
+            const isLastStep = state.currentStep === 5;
+            
+            // Check if consent checkbox is checked for last step
+            let isSubmitDisabled = false;
+            if (isLastStep) {
+                const consentCheckbox = document.getElementById('consent');
+                isSubmitDisabled = consentCheckbox ? !consentCheckbox.checked : true;
+            }
+            
+            const previousButton = `
+                <button 
+                    onclick="navigateStep(-1)" 
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 ${isPreviousDisabled ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${isPreviousDisabled ? 'disabled' : ''}
+                >
+                    Previous
+                </button>
+            `;
+            
+            const nextButton = `
+                <button 
+                    id="nextButton"
+                    onclick="${isLastStep ? 'submitForm()' : 'navigateStep(1)'}" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${(isNextDisabled || isSubmitDisabled) ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${(isNextDisabled || isSubmitDisabled) ? 'disabled' : ''}
+                >
+                    ${isLastStep ? 'Submit' : 'Next'}
+                </button>
+            `;
+            
+            return `
+                <div class="flex justify-between mt-6">
+                    ${previousButton}
+                    ${nextButton}
+                </div>
+            `;
+        }
+
+        function render() {
+            let content = '';
+            
+            if (state.showSuccess) {
+                content = renderSuccessMessage();
+            } else {
+                content = `
+                    ${renderStepIndicator()}
+                    
+                    ${state.currentStep === 1 ? renderStep1() : ''}
+                    ${state.currentStep === 2 ? renderStep2() : ''}
+                    ${state.currentStep === 3 ? renderStep3() : ''}
+                    ${state.currentStep === 4 ? renderStep4() : ''}
+                    ${state.currentStep === 5 ? renderStep5() : ''}
+                    
+                    ${renderNavigationButtons()}
+                `;
+            }
+            
+            document.getElementById('root').innerHTML = content;
+        }
+
+        // Event handlers
+        function selectCaseType(type) {
+            state.selectedCaseType = type;
+            render();
+        }
+
+        function selectJurisdiction(jurisdiction) {
+            state.selectedJurisdiction = jurisdiction;
+            render();
+        }
+
+        function updateUserInput(field, value) {
+            state.userInputs[field] = value;
+            render();
+        }
+
+        function navigateStep(direction) {
+            state.currentStep += direction;
+            render();
+        }
+
+        function submitForm() {
+            if (document.getElementById('consent').checked) {
+                state.showSuccess = true;
+                render();
+            } else {
+                alert('Please agree to the terms and conditions to proceed.');
+            }
+        }
+
+        function updateConsentStatus() {
+            // Update the submit button status based on the consent checkbox
+            if (state.currentStep === 5) {
+                const consentCheckbox = document.getElementById('consent');
+                const nextButton = document.getElementById('nextButton');
+                
+                if (nextButton && consentCheckbox) {
+                    if (consentCheckbox.checked) {
+                        nextButton.disabled = false;
+                        nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        nextButton.disabled = true;
+                        nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+        }
+
+        function resetForm() {
+            // Reset the state
+            state.currentStep = 1;
+            state.selectedCaseType = '';
+            state.selectedJurisdiction = '';
+            state.showSuccess = false;
+            state.userInputs = {
+                clientName: '',
+                contactInfo: '',
+                incidentDate: '',
+                caseDescription: '',
+            };
+            
+            render();
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', render);
+    </script>
+</body>
+</html>

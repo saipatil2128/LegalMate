@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templates</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px; 
+        }
+        header {
+            background-color: #1a237e;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            color: #1a237e;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+        .content {
+            flex: 3;
+            min-width: 300px;
+        }
+        .template-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .template-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .category {
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #1a237e;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0e1442;
+        }
+        .legal-help {
+            background-color: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar-nav li {
+            margin-bottom: 10px;
+        }
+        .sidebar-nav a {
+            text-decoration: none;
+            color: #1a237e;
+            font-weight: 500;
+        }
+        .sidebar-nav a:hover {
+            text-decoration: underline;
+        }
+        .disclaimer {
+            background-color: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Templates</h1>
+        <p>Access professionally drafted legal templates</p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Categories</h2>
+            <ul class="sidebar-nav">
+                <li><a href="#family-law">Family Law Documents</a></li>
+                <li><a href="#property">Property Agreements</a></li>
+                <li><a href="#business">Business Contracts</a></li>
+                <li><a href="#employment">Employment Documents</a></li>
+                <li><a href="#general">General Agreements</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+    
+            <section id="family-law" class="category">
+                <h2>Family Law Documents</h2>
+                
+                <div class="template-card">
+                    <h3>Marriage Registration Agreement</h3>
+                    <p>A standardized document for registering marriage under the Special Marriage Act, 1954. This template complies with requirements from all Indian states.</p>
+                    <a href="https://igrmaharashtra.gov.in/Home/marriage_registration" class="btn">Template</a>
+                    
+                </div>
+
+                <div class="template-card">
+                    <h3>Divorce Petition by Mutual Consent</h3>
+                    <p>Template for filing a divorce petition under Section 13B of the Hindu Marriage Act, 1955 or Section 28 of the Special Marriage Act, 1954.</p>
+                    <a href="https://www.alrp.org/wp-content/uploads/Sample-Marital-Settlement-Agreement.pdf" class="btn">Template</a>
+                </div>
+
+                <div class="template-card">
+                    <h3>Child Custody Agreement</h3>
+                    <p>A comprehensive parenting plan template that outlines custody arrangements, visitation schedules, and other parental rights in accordance with the Guardian and Wards Act.</p>
+                    <a href="https://app.pandadoc.com/a/#/documents/ytJKxfLoXj5zaktEMAEq5U" class="btn">Template</a>
+                </div>
+
+                <div class="template-card">
+                    <h3>Maintenance Agreement</h3>
+                    <p>Template for spousal and child maintenance agreements under Section 125 of CrPC and relevant personal laws.</p>
+                    <a href="https://www.wonder.legal/uk/creation-modele/child-maintenance-agreement" class="btn">Template</a>
+                 
+                </div>
+            </section>
+
+            <section id="property" class="category">
+                <h2>Property Agreements</h2>
+                
+                <div class="template-card">
+                    <h3>Residential Rental Agreement</h3>
+                    <p>A comprehensive lease agreement for residential properties that complies with the Rent Control Acts of various Indian states and the Model Tenancy Act, 2021.</p>
+                    <a href="https://assets1.cleartax-cdn.com/cleartax/images/1655708276_rentalagreementsampleandallyouneedtoknow.pdf" class="btn">Template</a>
+                    
+                </div>
+
+                <div class="template-card">
+                    <h3>Commercial Lease Agreement</h3>
+                    <p>Lease template for office spaces, retail outlets, and other commercial properties with provisions for security deposit, maintenance, and other terms.</p>
+                    <a href="https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Tools_templates/internal_templates/Commercial%20Lease%20Agreement.docx" class="btn">Template</a>
+                  
+                </div>
+
+                <div class="template-card">
+                    <h3>Property Sale Agreement</h3>
+                    <p>Template for sale of immovable property in compliance with the Transfer of Property Act, 1882 and the Registration Act, 1908.</p>
+                    <a href="https://www.99acres.com/microsite/articles/files/2016/06/Agreement-For-Sale.doc" class="btn">Template</a>
+                    
+                </div>
+            </section>
+
+            <section id="business" class="category">
+                <h2>Business Contracts</h2>
+                
+                <div class="template-card">
+                    <h3>Partnership Deed</h3>
+                    <p>Template for forming a partnership under the Indian Partnership Act, 1932, outlining capital contributions, profit-sharing, and management rights.</p>
+                    <a href="https://www.indiafilings.com/sample-format/partnership-deed-format.doc" class="btn">Template</a>
+                    
+                </div>
+
+                <div class="template-card">
+                    <h3>Non-Disclosure Agreement (NDA)</h3>
+                    <p>Confidentiality agreement template to protect proprietary information and trade secrets, enforceable under Indian contract law.</p>
+                    <a href="https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Tools_templates/internal_templates/legal_templates/Non%20Disclosure%20Agreement.docx" class="btn">Template</a>
+                    
+                </div>
+            </section>
+
+            <section id="employment" class="category">
+                <h2>Employment Documents</h2>
+                
+                <div class="template-card">
+                    <h3>Employment Contract</h3>
+                    <p>A comprehensive employment agreement template compliant with the Industrial Employment (Standing Orders) Act and various labor laws applicable in India.</p>
+                    <a href="https://www.startupindia.gov.in/content/dam/invest-india/Templates/public/Tools_templates/internal_templates/hr_templates/Employment%20Agreement.docx" class="btn">Template</a>
+             
+                </div>
+
+                <div class="template-card">
+                    <h3>Employee Non-compete Agreement</h3>
+                    <p>Template for reasonable non-compete clauses that comply with Indian judicial interpretations on restrictive covenants.</p>
+                    <a href="https://www.hr360.com/WorkArea/DownloadAsset.aspx?id=6413" class="btn">Template</a>
+                
+                  
+                </div>
+            </section>
+
+            <section id="general" class="category">
+                <h2>General Agreements</h2>
+                
+                <div class="template-card">
+                    <h3>Power of Attorney</h3>
+                    <p>Template for general and special power of attorney documents in accordance with the Powers-of-Attorney Act, 1882.</p>
+                    <a href="https://jamabandi.nic.in/DeedTemplatesNew/word/English/GPA.doc" class="btn">Template</a>
+                   
+                </div>
+
+                <div class="template-card">
+                    <h3>Will</h3>
+                    <p>Template for a legally valid will according to the Indian Succession Act, 1925 and applicable personal laws.</p>
+                    <a href="https://d32b5joreyushd.cloudfront.net/media/subcategorysampledocument/2019-02-04_124544.0635360000.pdf" class="btn">Template</a>
+                 
+                </div>
+
+                <div class="template-card">
+                    <h3>Affidavit</h3>
+                    <p>General affidavit template that can be customized for various legal purposes, compliant with the Indian Oaths Act, 1969.</p>
+                    <a href="https://www.ndmc.gov.in/downloads/DownloadableForms/forms/Civil/AFFIDAVIT.doc" class="btn">Template</a>
+                  
+                </div>
+            </section>
+
+            <div class="legal-help">
+                <h3>Indian Legal Information</h3>
+                    <li>National Legal Services Authority (NALSA) Toll-Free Number: 1516</li>
+                    <li>Tele-Law Services: 1800-123-1245</li>
+                    <li>e-Courts Services Portal</li>
+                    <li>Lok Adalats for dispute resolution</li>
+                </ul>
+    
+            </div>
+        </main>
+    </div>
+
+
+</body>
+</html>

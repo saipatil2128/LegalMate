@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Procedures</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: #fff;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section-title {
+            color: #1a237e;
+            border-bottom: 2px solid #1a237e;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 1.8rem;
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            flex: 1 0 calc(33% - 25px);
+            min-width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .card h3 {
+            color: #1a237e;
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+        footer {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #1a237e;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .hero {
+            background-color: #e8eaf6;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .procedure-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .procedure-list li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+        .procedure-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .tab-container {
+            margin-top: 30px;
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .tab:hover {
+            background-color: #e8eaf6;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            color: #1a237e;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-top: none;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .process-step {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            position: relative;
+            padding: 0 15px;
+        }
+        .process-step:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            right: -10px;
+            top: 40px;
+            font-size: 28px;
+            color: #1a237e;
+        }
+        .step-number {
+            display: inline-flex;
+            width: 50px;
+            height: 50px;
+            background-color: #1a237e;
+            color: white;
+            border-radius: 50%;
+            line-height: 50px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 5px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .warning-box {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .tip-box {
+            background-color: #e8f5e9;
+            border-left: 5px solid #4CAF50;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .glossary {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        .glossary h4 {
+            margin-top: 0;
+            color: #1a237e;
+        }
+        .glossary dt {
+            font-weight: bold;
+            color: #303f9f;
+            margin-top: 15px;
+        }
+        .glossary dd {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+        .faq-question {
+            font-weight: 600;
+            color: #1a237e;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .faq-answer {
+            display: none;
+            padding: 10px 0 10px 20px;
+            border-left: 3px solid #e0e0e0;
+        }
+        .faq-answer.active {
+            display: block;
+        }
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .search-bar {
+            padding: 12px 20px;
+            width: 100%;
+            max-width: 600px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-bar:focus {
+            border-color: #1a237e;
+            box-shadow: 0 0 5px rgba(26, 35, 126, 0.3);
+        }
+        .help-badge {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        @media (max-width: 768px) {
+            .card {
+                flex: 1 0 100%;
+            }
+            .process-step:not(:last-child)::after {
+                display: none;
+            }
+            .process-flow {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Court Procedures</h1>
+    </header>
+
+    <div class="container">
+    
+
+        <section>
+            <div class="card-container">
+                <div class="card">
+                    <h3>Property, Family, or Money Disputes </h3>
+                    <p>Includes divorce, property disputes, unpaid loans, breach of contract, and other non-criminal matters.</p>
+                    <a href="#civil" class="btn">How Civil Cases Work</a>
+                </div>
+                <div class="card">
+                    <h3>Crime or Offense Related </h3>
+                    <p>Involves filing police complaints (FIR), arrest matters, bail, criminal trials, and all cases where someone broke the law.</p>
+                    <a href="#criminal" class="btn">How Criminal Cases Work</a>
+                </div>
+                <div class="card">
+                    <h3>Problem with Government</h3>
+                    <p>When you need to challenge a government decision, file a public interest case, or approach a special tribunal.</p>
+                    <a href="#administrative" class="btn">How to Challenge Authorities</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="civil">
+            <h2 class="section-title">Civil Cases - Solving Personal Disputes</h2>
+            
+        
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" onclick="openTab(event, 'civil-filing')">Starting Your Case</div>
+                    <div class="tab" onclick="openTab(event, 'civil-trial')">The Court Process</div>
+                    <div class="tab" onclick="openTab(event, 'civil-appeal')">What If You Lose?</div>
+                </div>
+
+                <div id="civil-filing" class="tab-content active">
+                    <h3>How to Start a Civil Case</h3>
+                    
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <span class="step-number">1</span>
+                            <p>Write Your Complaint<br>(Called a "Plaint")</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">2</span>
+                            <p>Pay Court Fee<br>(Based on Case Value)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">3</span>
+                            <p>Submit at Right Court<br>(Based on Location)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">4</span>
+                            <p>Court Notifies Other Party<br>(Called "Summons")</p>
+                        </div>
+                    </div>
+                    
+                    <h4>What to Bring With You:</h4>
+                    <ul class="procedure-list">
+                        <li>Your written complaint with all important facts (plaint)</li>
+                        <li>Supporting documents (contracts, photos, letters, etc.)</li>
+                        <li>Lawyer authorization form (if you have a lawyer)</li>
+                        <li>List of witnesses who can support your case</li>
+                        <li>Urgent requests for immediate relief (if needed)</li>
+                    </ul>
+                    
+                    <div class="tip-box">
+                        <strong>Helpful Tip:</strong> You must file your case either where the person you're suing lives OR where the dispute happened. Filing in the wrong place could get your case dismissed!
+                    </div>
+                    
+                    <div class="glossary">
+                        <h4>Simple Terms Used in Civil Cases:</h4>
+                        <dl>
+                            <dt>Plaint</dt>
+                            <dd>Your written complaint that starts the case</dd>
+                            
+                            <dt>Plaintiff</dt>
+                            <dd>The person who files the case (that's you if you're starting it)</dd>
+                            
+                            <dt>Defendant</dt>
+                            <dd>The person or organization you're suing</dd>
+                            
+                            <dt>Summons</dt>
+                            <dd>Official notice from court telling the other party about your case</dd>
+                            
+                            <dt>Vakalatnama</dt>
+                            <dd>Document authorizing your lawyer to represent you</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div id="civil-trial" class="tab-content">
+                    <h3>What Happens During Your Civil Case</h3>
+                    
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <span class="step-number">1</span>
+                            <p>Other Party Responds<br>(Written Statement)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">2</span>
+                            <p>Judge Identifies Issues<br>(What's in Dispute)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">3</span>
+                            <p>Both Sides Present Evidence<br>(Documents & Witnesses)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">4</span>
+                            <p>Final Arguments<br>(Summing Up)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">5</span>
+                            <p>Judge's Decision<br>(Judgment)</p>
+                        </div>
+                    </div>
+                    
+                    <h4>How Long Things Take:</h4>
+                    <ul class="procedure-list">
+                        <li>Other party's response: Usually within 30 days (can extend to 90 days)</li>
+                        <li>Sharing documents with each other: As scheduled by the court</li>
+                        <li>Witness statements and questioning: Takes several hearings</li>
+                        <li>Final arguments: After all evidence is presented</li>
+                    </ul>
+                    
+                    <div class="warning-box">
+                        <strong>Important Note:</strong> Civil cases in India often take years to resolve completely. Business-related disputes now have a special "fast track" process under the Commercial Courts Act.
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">What if the other party doesn't respond to the summons?</div>
+                        <div class="faq-answer">
+                            If the other party doesn't file a written response after receiving proper notice, the court can proceed with an "ex-parte" decision, which means the case continues without their input, and you may win by default.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">Do I need a lawyer for a civil case?</div>
+                        <div class="faq-answer">
+                            While you can represent yourself (called "party-in-person"), having a lawyer is highly recommended because civil procedures are complex. For smaller claims, you can approach consumer forums or lok adalats where procedures are simpler.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="civil-appeal" class="tab-content">
+                    <h3>How to Appeal if You Lose Your Case</h3>
+                    
+                    <h4>Where to Appeal:</h4>
+                    <ul class="procedure-list">
+                        <li>If you lost in District Court → Appeal to High Court</li>
+                        <li>If you lost in High Court → Appeal to Supreme Court</li>
+                    </ul>
+                    
+                    <h4>Time Limits for Filing Appeals:</h4>
+                    <ul class="procedure-list">
+                        <li>30 days from judgment date for most appeals</li>
+                        <li>90 days for Supreme Court appeals</li>
+                        <li>Extra time possible with good reason for delay</li>
+                    </ul>
+                    
+                    <h4>What You Need for Appeal:</h4>
+                    <ul class="procedure-list">
+                        <li>Appeal application (called "Memorandum of Appeal")</li>
+                        <li>Official copy of the judgment you're challenging</li>
+                        <li>Clear reasons why the judgment was wrong</li>
+                        <li>Required court fees</li>
+                    </ul>
+                    
+                    <div class="tip-box">
+                        <strong>Helpful Tip:</strong> An appeal is NOT a complete rehearing of your case. You need to show specific legal errors in the original judgment. New evidence is generally not allowed unless there's a very good reason why it wasn't available earlier.
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Alternative Option:</strong> Before filing a formal appeal, consider a "Review Petition" in the same court that gave the judgment. This is quicker and less expensive, but only works if there's an obvious error or new important evidence.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="criminal">
+            <h2 class="section-title">Criminal Cases - When Laws Are Broken</h2>
+        
+            
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" onclick="openTab(event, 'criminal-fir')">Reporting a Crime</div>
+                    <div class="tab" onclick="openTab(event, 'criminal-trial')">The Trial Process</div>
+                    <div class="tab" onclick="openTab(event, 'criminal-bail')">Getting Bail</div>
+                </div>
+
+                <div id="criminal-fir" class="tab-content active">
+                    <h3>How to Report a Crime and What Happens Next</h3>
+                    
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <span class="step-number">1</span>
+                            <p>File Police Complaint<br>(Called "FIR")</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">2</span>
+                            <p>Police Investigation<br>(Collecting Evidence)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">3</span>
+                            <p>Police Complete Report<br>(Called "Chargesheet")</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">4</span>
+                            <p>Case Moves to Court<br>(Judge Takes "Cognizance")</p>
+                        </div>
+                    </div>
+                    
+                    <h4>What You Need to Know:</h4>
+                    <ul class="procedure-list">
+                        <li>FIR must be registered for serious crimes (like theft, assault, fraud)</li>
+                        <li>"Zero FIR" can be filed at any police station if the crime happened elsewhere</li>
+                        <li>Police must complete investigation within 90 days for serious crimes</li>
+                        <li>If police take too long, accused person can get automatic bail</li>
+                    </ul>
+                    
+                    <div class="warning-box">
+                        <strong>If Police Refuse to File Your FIR:</strong> You can approach the Superintendent of Police or file a complaint directly with a Magistrate under Section 156(3) or Section 200 of the Criminal Procedure Code. Always get a receipt when filing a police complaint.
+                    </div>
+                    
+                    <div class="glossary">
+                        <h4>Simple Terms Used in Criminal Cases:</h4>
+                        <dl>
+                            <dt>FIR (First Information Report)</dt>
+                            <dd>The official written document that starts a police investigation</dd>
+                            
+                            <dt>Cognizable Offense</dt>
+                            <dd>Serious crimes where police can arrest without warrant (murder, theft, rape, etc.)</dd>
+                            
+                            <dt>Non-Cognizable Offense</dt>
+                            <dd>Less serious crimes where police need court permission before investigating (simple hurt, defamation, etc.)</dd>
+                            
+                            <dt>Chargesheet</dt>
+                            <dd>Police report with evidence and charges against the accused person</dd>
+                            
+                            <dt>Cognizance</dt>
+                            <dd>When the court officially takes notice of the case and begins proceedings</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div id="criminal-trial" class="tab-content">
+                    <h3>How Criminal Trials Work</h3>
+                    
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <span class="step-number">1</span>
+                            <p>Formal Charges Read<br>(Accused Says Guilty/Not Guilty)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">2</span>
+                            <p>Prosecution Evidence<br>(Witnesses & Documents)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">3</span>
+                            <p>Accused Gives Statement<br>(Their Side of Story)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">4</span>
+                            <p>Defense Evidence<br>(If Any)</p>
+                        </div>
+                        <div class="process-step">
+                            <span class="step-number">5</span>
+                            <p>Final Decision<br>(Conviction or Acquittal)</p>
+                        </div>
+                    </div>
+                    
+                    <h4>Different Types of Criminal Trials:</h4>
+                    <ul class="procedure-list">
+                        <li><strong>Warrant Trial:</strong> For serious crimes punishable by more than 2 years in prison</li>
+                        <li><strong>Summons Trial:</strong> For less serious offenses with simpler procedures</li>
+                        <li><strong>Summary Trial:</strong> For very minor offenses with quick procedures</li>
+                    </ul>
+                    
+                    <div class="info-box">
+                        <strong>Special Courts:</strong> Certain cases like child abuse (POCSO), corruption, terrorism, etc., have their own special courts with modified procedures.
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">What are my rights if I'm accused of a crime?</div>
+                        <div class="faq-answer">
+                            You have the right to: remain silent, know the charges against you, consult a lawyer (free legal aid if you can't afford one), not be forced to confess, cross-examine witnesses, present your own evidence, and be presumed innocent until proven guilty beyond reasonable doubt.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">Can I withdraw a criminal complaint?</div>
+                        <div class="faq-answer">
+                            For certain "compoundable" offenses (like simple hurt, defamation, or some property offenses), you can settle with the accused and withdraw the case with court permission. However, serious crimes (murder, rape, etc.) cannot be withdrawn even if the victim wants to, as these are considered crimes against society.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="criminal-bail" class="tab-content">
+                    <h3>Understanding Bail - Getting Released During Trial</h3>
+                    
+                    <h4>Types of Bail:</h4>
+                    <ul class="procedure-list">
+                        <li><strong>Regular Bail:</strong> When someone is already arrested (Sections 437/439)</li>
+                        <li><strong>Anticipatory Bail:</strong> When someone fears arrest (Section 438)</li>
+                        <li><strong>Default Bail:</strong> When police don't complete investigation on time (Section 167(2))</li>
+                        <li><strong>Interim Bail:</strong> Temporary bail until final bail decision</li>
+                    </ul>
+                    
+                    <h4>How to Apply for Bail:</h4>
+                    <ul class="procedure-list">
+                        <li>For minor offenses: Apply to the police officer or Magistrate's court</li>
+                        <li>For serious offenses: Apply to Magistrate or Sessions Court</li>
+                        <li>For anticipatory bail: Apply to Sessions Court or High Court</li>
+                    </ul>
+                    
+                    <h4>Common Bail Conditions:</h4>
+                    <ul class="procedure-list">
+                        <li>Sign a bond promising to attend all court dates</li>
+                        <li>Provide "sureties" (people who guarantee you'll attend court)</li>
+                        <li>Surrender your passport in some cases</li>
+                        <li>Report to police station regularly</li>
+                        <li>Not contact witnesses or tamper with evidence</li>
+                    </ul>
+                    
+                    <div class="tip-box">
+                        <strong>Helpful Tip:</strong> Bail is a RIGHT for most offenses, not a privilege. For non-violent, bailable offenses, courts are more likely to grant bail. Factors that help: having a fixed address, family ties, no criminal record, and willingness to follow conditions.
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>Important:</strong> Breaking bail conditions can result in immediate arrest and difficulty getting bail again in the future.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="administrative">
+            <h2 class="section-title">Administrative Cases - Challenging the Government</h2>
+            
+            <div class="info-box">
+                <strong>What are Administrative Cases?</strong> These involve disputes with government bodies or officials, challenges to government decisions, public interest issues, or cases that go to specialized tribunals instead of regular courts.
+            </div>
+            
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" onclick="openTab(event, 'admin-writ')">Writ Petitions</div>
+                    <div class="tab" onclick="openTab(event, 'admin-pil')">Public Interest Cases</div>
+                    <div class="tab" onclick="openTab(event, 'admin-tribunals')">Special Courts & Tribunals</div>
+                </div>
+
+                <div id="admin-writ" class="tab-content active">
+                    <h3>Writ Petitions - Challenging Government Actions</h3>
+                    
+                    <h4>Types of Writs Made Simple:</h4>
+                    <ul class="procedure-list">
+                        <li><strong>Habeas Corpus:</strong> When someone is wrongfully detained or arrested</li>
+                        <li><strong>Mandamus:</strong> To make government officials do their legal duty</li>
+                        <li><strong>Prohibition:</strong> To stop a lower court from overstepping its powers</li>
+                        <li><strong>Certiorari:</strong> To cancel an improper order from a lower court or tribunal</li>
+                        <li><strong>Quo Warranto:</strong> To challenge someone wrongfully holding a public office</li>
+                    </ul>
+                    
+                    <h4>How to File a Writ:</h4>
+                    <ul class="procedure-list">
+                        <li>Prepare petition clearly stating which right was violated</li>
+                        <li>File in High Court (under Article 226) or Supreme Court (under Article 32)</li>
+                        <li>Include all relevant documents and specific grounds</li>
+                        <li>Pay required court fees</li>
+                    </ul>
+                    
+                    <div class="tip-box">
+                        <strong>When to Use Writs:</strong> Writs are powerful tools when government officials or courts have clearly violated your legal rights or acted beyond their powers. They're faster than regular cases but should be filed quickly after the violation (ideally within a few months).
+                    </div>
+                    
+                
+            
+
+                <div id="admin-pil" class="tab-content">
+                    <h3>Public Interest Litigation (PIL) - Fighting for Broader Issues</h3>
+                    
+                    <h4>What You Need to File a PIL:</h4>
+                    <ul class="procedure-list">
+                        <li>The issue must affect the general public or disadvantaged groups</li>
+                        <li>Any concerned citizen can file, not just directly affected people</li>
+                        <li>Even a simple letter to the Chief Justice can be treated as a PIL</li>
+                        <li>Less strict rules compared to regular cases</li>
+                    </ul>
+                    
+                    <h4>Steps to File a PIL:</h4>
+                    <ul class="procedure-list">
+                        <li>Write a detailed petition explaining the public interest issue</li>
+                        <li>Support with basic facts and supporting documents</li>
+                        <li>File with a sworn statement (affidavit) confirming the facts</li>
+                        <li>The court may appoint a helper (amicus curiae) to assist</li>
+                        <li>Court often gives direct orders to authorities to solve the problem</li>
+                    </ul>
+                    
+                    <div class="info-box">
+                        <strong>What Makes a Good PIL:</strong> PILs work best for major issues that affect many people but aren't being addressed, like environmental problems, human rights violations, or government corruption. The courts take PILs seriously when they involve fundamental rights or serious government negligence.
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>Be Careful:</strong> Courts have become strict about PILs to prevent misuse. Your PIL may be rejected or fined if it's for personal gain, political motives, or issues that can be handled by regular legal processes.
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">Can I file a PIL without a lawyer?</div>
+                        <div class="faq-answer">
+                            Yes, you can file a PIL without a lawyer. In fact, the Supreme Court even accepts PILs through letters addressed to the Chief Justice. However, having legal help is recommended to properly frame the issue and follow procedures, especially for complex matters.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-tribunals" class="tab-content">
+                    <h3>Specialized Tribunals - Expert Forums for Specific Issues</h3>
+                    
+                    <h4>Major Tribunals in India:</h4>
+                    <ul class="procedure-list">
+                        <li><strong>National Green Tribunal:</strong> For environmental cases</li>
+                        <li><strong>Central Administrative Tribunal:</strong> For government employee matters</li>
+                        <li><strong>National Company Law Tribunal:</strong> For corporate disputes</li>
+                        <li><strong>Income Tax Appellate Tribunal:</strong> For tax disagreements</li>
+                        <li><strong>Consumer Forums:</strong> For complaints against products and services</li>
+                    </ul>
+                    
+                    <h4>How Tribunals Work:</h4>
+                    <ul class="procedure-list">
+                        <li>Fill out specific application forms (each tribunal has its own)</li>
+                        <li>Simpler and less formal than regular courts</li>
+                        <li>Cases are decided more quickly, with specific timeframes</li>
+                        <li>If you're unhappy with tribunal decision, you can appeal to High Court or Supreme Court</li>
+                    </ul>
+                    
+                    <div class="tip-box">
+                        <strong>Advantages of Tribunals:</strong> Tribunals have expert members who understand specialized fields (like environment, tax, or banking). They're usually faster and less expensive than regular courts. Many allow you to represent yourself without a lawyer.
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Consumer Forums - Easy Access to Justice:</strong> Consumer forums are one of the most accessible tribunals for ordinary citizens. You can file complaints about defective products, poor services, unfair trade practices, or overcharging. There are three levels: District (up to ₹1 crore), State (up to ₹10 crores), and National (above ₹10 crores).
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">How do I choose between regular court and a tribunal?</div>
+                        <div class="faq-answer">
+                            If your issue falls within a tribunal's special area (like environmental matters for NGT or service matters for CAT), the tribunal is usually the better choice - they're faster, have subject experts, and follow simpler procedures. In some cases, the law requires you to approach the tribunal first before going to regular courts.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Practical Court Tips For Everyone</h2>
+            <div class="card-container">
+                <div class="card">
+                    <h3>How to Prepare Court Documents</h3>
+                    <p>Simple guidelines to make sure your court papers are accepted.</p>
+                    <ul class="procedure-list">
+                        <li>Use A4 size white paper with 1.5 line spacing</li>
+                        <li>Number all pages properly and create an index</li>
+                        <li>Pay correct court fees (ask court clerk if unsure)</li>
+                        <li>Make enough copies for court and all parties</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Court Etiquette & Behavior</h3>
+                    <p>How to act in court to make a good impression.</p>
+                    <ul class="procedure-list">
+                        <li>Dress formally (white shirt/saree preferred)</li>
+                        <li>Stand when the judge enters or when speaking</li>
+                        <li>Address the judge as "Your Honor" or "Honorable Court"</li>
+                        <li>Speak clearly and don't interrupt others</li>
+                        <li>Switch off your mobile phone</li>
+                    </ul>
+                </div>
+                <div class="card">
+    <h3>Court Fees & Costs</h3>
+    <p>Understanding what you'll need to pay.</p>
+    <ul class="procedure-list">
+        <li>Claims up to ₹1,000: Court fee is approximately ₹20–₹50</li>
+        <li>Claims between ₹1,001 and ₹10,000: Fees range from ₹50–₹500</li>
+        <li>Claims between ₹10,001 and ₹1,00,000: Fees range from ₹500–₹5,000</li>
+        <li>Claims above ₹1,00,000: Approximately 1% of the claim amount, subject to a state-specific maximum (e.g., ₹75,000 in some states)</li>
+        <li>Additional fees may apply for applications, certified copies, and miscellaneous petitions (typically ₹10–₹100 each)</li>
+        <li>Most courts now accept online payments through state court portals or e-Courts services</li>
+        <li>Free legal aid or fee waivers may be available through the Legal Services Authorities if you cannot afford the fees</li>
+    </ul>
+</div>
+
+            </div>
+        </section>
+
+       
+
+    <script>
+        function openTab(evt, tabName) {
+            var tabcontent = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            var tabs = document.getElementsByClassName("tab");
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        function toggleFAQ(element) {
+            var answer = element.nextElementSibling;
+            if (answer.classList.contains("active")) {
+                answer.classList.remove("active");
+            } else {
+                answer.classList.add("active");
+            }
+        }
+    </script>
+</body>
+</html>
